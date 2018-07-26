@@ -16,7 +16,7 @@ ___
 
 **other examples**
 
-1) [anim1](https://danilw.github.io/WebGL-image-slider/v1/anim1/simple_slider.html) 2) [anim2](https://danilw.github.io/WebGL-image-slider/v1/anim2/simple_slider.html) 3) [using playback/playnext](https://danilw.github.io/WebGL-image-slider/v1/fs3d/simple_slider.html) 
+1 [anim1](https://danilw.github.io/WebGL-image-slider/v1/anim1/simple_slider.html) 2 [anim2](https://danilw.github.io/WebGL-image-slider/v1/anim2/simple_slider.html) 3 [using playback/playnext](https://danilw.github.io/WebGL-image-slider/v1/fs3d/simple_slider.html) 
 
 **How it work:**
 
