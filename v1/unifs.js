@@ -227,7 +227,7 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
     var ltime = 0;
     function animloopx(gtime) {
         var vtx = gtime % that.FadeSpeed;
-        if (vtx > ltime) {
+        if (vtx >= ltime) {
             ltime = vtx;
         } else {
             ltime = vtx;
