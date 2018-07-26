@@ -21,10 +21,10 @@ var Texture = function (fn, gl, id, w, h) {
         that.image.onload = function (event) {
             var file = fn.split("/");
             that.texture = gl.createTexture();
-            if (w*2 > this.width)
-                this.width = w*2;
-            if (h*2 > this.height)
-                this.height = h*2;
+            if (w * 2 > this.width)
+                this.width = w * 2;
+            if (h * 2 > this.height)
+                this.height = h * 2;
             that.width = this.width;
             that.height = this.height;
 
@@ -63,6 +63,7 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
     this.Shader = null;
     this.animationfn = null;
     this.shadersloaded = false;
+    this.animonce = false;
     this.maxtexturesx = maxtextures; //max saved textures
     this.texturexx = [];
     this.texturesfsize = 2;
@@ -102,7 +103,8 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
         };
         xmlhttp.open("GET", filename_vs, true);
         xmlhttp.send();
-    };
+    }
+    ;
     function InitializeShader(source_vs, source_frag, fv, ff)
     {
         var ErrorMessage = "Initializing Shader Program: <" + fv + ">, <" + ff + ">";
@@ -138,7 +140,8 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
             console.log(ErrorMessage + ' ...shader successfully created.');
             return program;
         }
-    };
+    }
+    ;
     var atmpt = 50;
     var catmpt = 0;
     function waiting() {
@@ -156,20 +159,23 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
             } else
                 console.log('failed loading shaders');
         }, 100);
-    };
+    }
+    ;
     function initdtextr() {
         for (var i = 0; i < that.maxtexturesx; i++) {
             that.texturexx[i] = new Texture("dummy", that.gl, -2, that.width, that.height);
         }
-    };
+    }
+    ;
     function animreqnextt(fx, flag) {
         that.flagx = flag;
         that.usedtexturenext = fx; //id
-    };
-    function animgotofw(idx) {
+    }
+    ;
+    this.animgotofw = function (idx) {
         animreqnextt(idx, 1);
     };
-    function animgotobk(idx) {
+    this.animgotobk = function (idx) {
         animreqnextt(idx, -1);
     };
     this.animqreg = function (a, b, c) {
@@ -220,9 +226,8 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
     };
     var ltime = 0;
     function animloopx(gtime) {
-
         var vtx = gtime % that.FadeSpeed;
-        if (vtx > ltime) {
+        if (vtx >= ltime) {
             ltime = vtx;
         } else {
             ltime = vtx;
@@ -232,36 +237,46 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
                     that.usedtexturelast = that.usedtexturethis;
                     that.usedtexturethis = that.usedtexturethisn;
                     that.usedtexturethisn = gt;
+                    that.animonce = false;
                 }
                 if ((that.flagxn === -1)) {
                     var gt = that.usedtexturethis;
                     that.usedtexturethis = that.usedtexturelast;
                     that.usedtexturelast = that.usedtexturethisn;
                     that.usedtexturethisn = gt;
+                    that.animonce = false;
                 }
             } else {
                 that.flagxn = that.flagx;
                 if ((that.flagxn === 1)) {
-                    that.usedtexturelast = that.usedtexturethis;
-                    that.usedtexturethis = that.usedtexturethisn;
-                    that.usedtexturethisn = that.usedtexturenext;
+                    if (that.animonce)
+                        that.usedtexturethisn = that.usedtexturenext;
+                    else {
+                        that.usedtexturelast = that.usedtexturethis;
+                        that.usedtexturethis = that.usedtexturethisn;
+                        that.usedtexturethisn = that.usedtexturenext;
+                    }
                 }
                 if ((that.flagxn === -1)) {
-                    that.usedtexturethisn = that.usedtexturethis;
-                    that.usedtexturethis = that.usedtexturelast;
-                    that.usedtexturelast = that.usedtexturenext;
-
+                    if (that.animonce)
+                        that.usedtexturelast = that.usedtexturenext;
+                    else {
+                        that.usedtexturethisn = that.usedtexturethis;
+                        that.usedtexturethis = that.usedtexturelast;
+                        that.usedtexturelast = that.usedtexturenext;
+                    }
                 }
                 that.usedtexturenext = -1;
             }
         }
-    };
+    }
+    ;
     this.animloopfw = function () {
         that.flagxn = 1;
         if (that.usedtexturenext === -1) {
             if (that.nextindex === that.imagesgx.length)
                 that.nextindex = 0;
-            animgotofw(that.loadtexture(that.imagesgx[that.nextindex].medium));
+            that.animgotofw(that.loadtexture(that.imagesgx[that.nextindex].medium));
             that.nextindex++;
         }
     };
@@ -270,21 +285,21 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
         if (that.usedtexturenext === -1) {
             if (that.nextindex === -1)
                 that.nextindex = that.imagesgx.length - 1;
-            animgotobk(that.loadtexture(that.imagesgx[that.nextindex].medium));
+            that.animgotobk(that.loadtexture(that.imagesgx[that.nextindex].medium));
             that.nextindex--;
         }
     };
-    var start = null;
+    this.start = null;
     function step(T) {
-        if (!start)
-            start = T;
+        if (!that.start)
+            that.start = T;
         if (!that.gl) {
             console.log("ERROR: webgl lost");
             return;
         }
-        var timex = (T - start) / 1000;
+        var timex = (T - that.start) / 1000;
         if (timex > 6000)
-            start = T;
+            that.start = T;
         if (that.animationfn) {
             that.animationfn();
         }
@@ -318,7 +333,8 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
         }
         that.gl.drawElements(that.gl.TRIANGLES, 6, that.gl.UNSIGNED_SHORT, 0);
         window.requestAnimationFrame(step);
-    };
+    }
+    ;
     function launchwebgl() {
         var vertices = new Float32Array([
             -1.0, 1.0, 0.0,
@@ -342,7 +358,8 @@ var glslslider = function (canvas, maxtextures, fadesx, imagesx) {
         that.gl.vertexAttribPointer(coords, 3, that.gl.FLOAT, false, 0, 0);
         that.gl.enableVertexAttribArray(coords);
         window.requestAnimationFrame(step);
-    };
+    }
+    ;
     that.gl = canvas.getContext("webgl2");
     if (!gl) {
         console.log('webgl2 not supported, trying webgl');
