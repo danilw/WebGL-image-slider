@@ -98,7 +98,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 scale = vec2(grid_width)/iResolution.xy;
     vec2 oguv=guv;
     guv.y=0.875-guv.y;
-    guv.x+=0.035;
+    guv.x+=0.0467;
     if(playnext){
     vec4 c1 = mod(iTime,FadeSpeed*2.)>mod(iTime,FadeSpeed)?
         (!load2 ? loader(oguv + vec2(1.0-uv.x,uv.y)*scale) :texture2D(iChannel2, guv + vec2(1.0-uv.x,1.-uv.y)*scale)):(!load1 ? loader(oguv + vec2(1.0-uv.x,uv.y)*scale) :texture2D(iChannel1, guv + vec2(1.0-uv.x,1.-uv.y)*scale));
