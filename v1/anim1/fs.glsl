@@ -26,90 +26,91 @@ uniform float u_FadeSpeed;
 #define playback u_playback
 #define playnext u_playnext
 
-#define back iChannel0
-#define from iChannel1
-#define to iChannel2
-#define resolution (iResolution.xy)
-
-float progress;
-float reflection = .4;
-float perspective = .2;
-float depth = 3.;
-
-vec4 loading(){
-    return vec4(0.1,0.1,0.4,1.);
-}
- 
-const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
-const vec2 boundMin = vec2(0.0, 0.0);
-const vec2 boundMax = vec2(1.0, 1.0);
-
-bool inBounds (vec2 p) {
-  return all(lessThan(boundMin, p)) && all(lessThan(p, boundMax));
-}
- 
-vec2 project (vec2 p) {
-  return p * vec2(1.0, -1.2) + vec2(0.0, -0.02);
+vec4 loader( vec2 U )
+{
+    U*=iResolution.xy;
+        vec2 R =  iResolution.xy, uv = (2.*U -R)/R.y;
+    vec4 O=vec4(1.);
+    float t = iTime,
+          a = atan(uv.x,uv.y)  - t *1.8,
+          l = length(uv),
+          d = smoothstep(1.,.8,    l)
+              - smoothstep(1.,.8, 2.*l);  
+          d *= smoothstep(0.,1., fract(a/6.28));
+    O =  vec4(0.58+0.531*uv.x*sin(t),0.738-0.31*uv.y*cos(t),.5,1)  + 1.2*d * vec4(.478537, .73621, .478537, 0);
+    //O =  vec4(0.,-0.1,.15,1)  + 1.2*d * vec4(.478537, .73621, .478537, 0);
+    O *= 1. - l*l*.155;
+    return O;
 }
 
-vec2 refx(vec2 c){
-	return vec2(c.x,1.-c.y);
-}
- 
-vec4 bgColor (vec2 p, vec2 pfr, vec2 pto) {
-  vec4 c = black;
-  pfr = project(pfr);
-  if (inBounds(pfr)) {
-    c += mix(black, playback?(!load0?loading():texture2D(back, refx(pfr))):(!load1?loading():texture2D(from, refx(pfr))), reflection * mix(1.0, 0.0, pfr.y));
-  }
-  pto = project(pto);
-  if (inBounds(pto)) {
-    c += mix(black, playback?(!load1?loading():texture2D(from, refx(pto))):(!load2?loading():texture2D(to, refx(pto))), reflection * mix(1.0, 0.0, pto.y));
-  }
-  return c;
-}
- 
-void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-  progress = sin(iTime*.5)*.5+.5;
-  vec2 p = fragCoord.xy / resolution.xy;
-  progress=iTime/FadeSpeed;
-  if(playback)progress*=-1.;
-  if((!playback)&&(!playnext))progress=0.;
-  progress=mod(progress,1.);
 
-  vec2 pfr, pto = vec2(-1.);
- 
-  float size = mix(1.0, depth, progress);
-  float persp = perspective * progress;
-  pfr = (p + vec2(-0.0, -0.5)) * vec2(size/(1.0-perspective*progress), size/(1.0-size*persp*p.x)) + vec2(0., 0.5);
- 
-  size = mix(1.0, depth, 1.-progress);
-  persp = perspective * (1.-progress);
-  pto = (p + vec2(-1.0, -0.5)) * vec2(size/(1.0-perspective*(1.0-progress)), size/(1.0-size*persp*(0.5-p.x))) + vec2(1.0, 0.5);
- 
-  bool fromOver = progress < 0.5;
-  if (fromOver) {
-    if (inBounds(pfr)) {
-      fragColor = (playback&&(abs(progress)>0.000001))?(!load0?loading():texture2D(back, refx(pfr))):(!load1?loading():texture2D(from, refx(pfr)));
+vec2 plane(vec3 p, vec3 d, vec3 normal)
+{
+    vec3 up = vec3(0,1,0);
+    vec3 right = cross(up, normal);
+    
+    float dn = dot(d, normal);
+    float pn = dot(p, normal);
+    
+    vec3 hit = p - d / dn * pn;
+    
+    vec2 uv;
+    uv.x = dot(hit, right);
+    uv.y = dot(hit, up);
+    
+    return uv;
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    if((!playback)&&(!playnext)){fragColor = !load1 ? loader( fragCoord/iResolution.xy) :texture2D(iChannel1,  vec2(fragCoord.x/iResolution.x,1.-fragCoord.y/iResolution.y));return;}
+    vec2 xy = fragCoord - iResolution.xy / 2.0;
+    float grid_width = iResolution.y/8.;
+    xy /= grid_width;
+    xy.x-=0.5;
+    vec2 grid = floor(xy);
+    xy = mod(xy, 1.0) - 0.5;
+    
+    float alpha = 0.0;
+    float time = iTime- (grid.y - grid.x)*0.1-1.;
+    time*=6./(FadeSpeed*2.);
+    time = mod(time, 6.);
+    alpha += smoothstep(0.0, 1.0, time);
+    alpha += 1. - smoothstep(3.0, 4.0, time);
+    alpha = abs(mod(alpha, 2.0)-1.0);
+    
+    float side = step(0.5, alpha);
+    
+    alpha = radians(alpha*180.0);
+    vec4 n = vec4(cos(alpha),0,sin(alpha),-sin(alpha));
+    vec3 d = vec3(1.0,xy.y,xy.x);
+    vec3 p = vec3(-1.0+n.w/4.0,0,0);
+    vec2 uv = plane(p, d, n.xyz);
+    
+    uv += 0.5;
+    if (uv.x<0.0||uv.y<0.0||uv.x>1.0||uv.y>1.0)
+    {
+        fragColor *= 0.0;
+        return;
     }
-    else if (inBounds(pto)) {
-      fragColor = playback?(!load1?loading():texture2D(from, refx(pto))):(!load2?loading():texture2D(to, refx(pto)));
+    
+    vec2 guv = grid*grid_width/iResolution.xy+0.5;
+    vec2 scale = vec2(grid_width)/iResolution.xy;
+    vec2 oguv=guv;
+    guv.y=0.875-guv.y;
+    guv.x+=0.035;
+    if(playnext){
+    vec4 c1 = mod(iTime,FadeSpeed*2.)>mod(iTime,FadeSpeed)?
+        (!load2 ? loader(oguv + vec2(1.0-uv.x,uv.y)*scale) :texture2D(iChannel2, guv + vec2(1.0-uv.x,1.-uv.y)*scale)):(!load1 ? loader(oguv + vec2(1.0-uv.x,uv.y)*scale) :texture2D(iChannel1, guv + vec2(1.0-uv.x,1.-uv.y)*scale));
+    vec4 c2 = mod(iTime,FadeSpeed*2.)>mod(iTime,FadeSpeed)?
+        (!load1 ? loader(oguv + vec2(uv.x,uv.y)*scale) :texture2D(iChannel1, guv + vec2(uv.x,1.-uv.y)*scale)):(!load2 ? loader(oguv + vec2(uv.x,uv.y)*scale) :texture2D(iChannel2, guv + vec2(uv.x,1.-uv.y)*scale));
+            fragColor = mix(c1, c2, side);}else{
+        vec4 c1 = mod(iTime,FadeSpeed*2.)>mod(iTime,FadeSpeed)?
+        (!load0? loader(oguv + vec2(1.0-uv.x,uv.y)*scale) :texture2D(iChannel0, guv + vec2(1.0-uv.x,1.-uv.y)*scale)):(!load1 ? loader(oguv + vec2(1.0-uv.x,uv.y)*scale) :texture2D(iChannel1, guv + vec2(1.0-uv.x,1.-uv.y)*scale));
+    vec4 c2 = mod(iTime,FadeSpeed*2.)>mod(iTime,FadeSpeed)?
+        (!load1 ? loader(oguv + vec2(uv.x,uv.y)*scale) :texture2D(iChannel1, guv + vec2(uv.x,1.-uv.y)*scale)):(!load0 ? loader(oguv + vec2(uv.x,uv.y)*scale) :texture2D(iChannel0, guv + vec2(uv.x,1.-uv.y)*scale));
+            fragColor = mix(c1, c2, side);
     }
-    else {
-      fragColor = bgColor(p, pfr, pto);
-    }
-  }
-  else {
-    if (inBounds(pto)) {
-      fragColor = playback?(!load1?loading():texture2D(from, refx(pto))):(!load2?loading():texture2D(to, refx(pto)));
-    }
-    else if (inBounds(pfr)) {
-      fragColor = playback?(!load0?loading():texture2D(back, refx(pfr))):(!load1?loading():texture2D(from, refx(pfr)));
-    }
-    else {
-      fragColor = bgColor(p, pfr, pto);
-    }
-  }
 }
 
 
