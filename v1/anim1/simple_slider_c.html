@@ -1,0 +1,124 @@
+<html>
+    <head>
+        <title>GLSL images</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <style>
+            img {
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 5px;
+                width: 150px;
+            }
+
+            img:hover {
+                box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+            }
+        </style>
+        <script type="text/javascript" src="../unifs.js"></script>
+    </head>
+    <body style = "background: #2c2f33; padding: 32px;">
+        <canvas id = "gl" width = "800" height = "600"></canvas>
+        <script type = "text/javascript">
+            "use strict";
+                        var images = [{
+                    "link": "wallpaperscraft.com/image/beach_tropics_sea_sand_summer_84726_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/beach_tropics_sea_sand_summer_84726_300x168.jpg",
+                    "medium": "../image/medium/beach_tropics_sea_sand_summer_84726_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/mountains_grass_trees_day_summer_93030_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/mountains_grass_trees_day_summer_93030_300x168.jpg",
+                    "medium": "../image/medium/mountains_grass_trees_day_summer_93030_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/dawn_grass_sky_summer_light_87653_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/dawn_grass_sky_summer_light_87653_300x168.jpg",
+                    "medium": "../image/medium/dawn_grass_sky_summer_light_87653_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/beach_sand_palm_trees_tropical_90404_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/beach_sand_palm_trees_tropical_90404_300x168.jpg",
+                    "medium": "../image/medium/beach_sand_palm_trees_tropical_90404_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/tree_field_plain_green_sky_lonely_day_summer_45608_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/tree_field_plain_green_sky_lonely_day_summer_45608_300x168.jpg",
+                    "medium": "../image/medium/tree_field_plain_green_sky_lonely_day_summer_45608_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/mountains_nature_river_grass_beautiful_landscape_93282_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/mountains_nature_river_grass_beautiful_landscape_93282_300x168.jpg",
+                    "medium": "../image/medium/mountains_nature_river_grass_beautiful_landscape_93282_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/tree_sun_blue_lilac_krone_spring_flowering_from_below_light_53319_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/tree_sun_blue_lilac_krone_spring_flowering_from_below_light_53319_300x168.jpg",
+                    "medium": "../image/medium/tree_sun_blue_lilac_krone_spring_flowering_from_below_light_53319_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/lake_sunset_trees_landscape_beach_art_night_reflection_48159_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/lake_sunset_trees_landscape_beach_art_night_reflection_48159_300x168.jpg",
+                    "medium": "../image/medium/lake_sunset_trees_landscape_beach_art_night_reflection_48159_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/mount_rainier_usa_mountains_snow_trees_grass_flowers_slope_100278_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/mount_rainier_usa_mountains_snow_trees_grass_flowers_slope_100278_300x168.jpg",
+                    "medium": "../image/medium/mount_rainier_usa_mountains_snow_trees_grass_flowers_slope_100278_960x544.jpg",
+                }, {
+                    "link": "wallpaperscraft.com/image/trees_park_autumn_grass_leaves_90983_1920x1080.jpg",
+                    "thumbnail": "images.wallpaperscraft.com/image/trees_park_autumn_grass_leaves_90983_300x168.jpg",
+                    "medium": "../image/medium/trees_park_autumn_grass_leaves_90983_960x544.jpg",
+                }];
+            var canvas = document.getElementById('gl');
+
+            //new glslslider(<you canvas>, <max size of texture cache>, <FadeSpeed>, <image array>);
+            //<max size of texture cache> - minimal value 5 (five textures (0 to  4), 0-1-2 three textures for slider loop, 3 for load next image, 4 cache(load next image after id_3 used, then unload 3, and 3 used next time...loop))
+            //example if you images array have 1000 elements, and texture chache size=20,when 20 textures loaded, the first loaded(index 0) will unload to load and show index 21 texture from images array
+            //each texture use 1-10mb of video memory, cache size 20=200mb of video needed
+            //with value 5 every next texture will be reload every time
+            //<image array> - can be any size, textures can load and unload
+            var glslider = new glslslider(canvas, 20, 2.5, images);
+
+            //load three start textures
+            var a = glslider.loadtexture(images[0].medium);
+            var b = glslider.loadtexture(images[1].medium);
+            var c = glslider.loadtexture(images[2].medium);
+
+            //register in loop
+            glslider.animqreg(a, b, c);
+
+            //creating custom anim function
+            var nextid = 3;
+            var lastid = 2;
+            var antype = 0;
+            var reqnext = false;
+            function mouseOverx(idx) {
+               if ((!glslider.animonce)&&(idx!==nextid)) {
+                    lastid = nextid;
+                    antype = lastid > idx ? -1 : 1;
+                    nextid = idx;
+                    reqnext = true;
+                }
+            }
+            var anim = function () {
+                if (!glslider.animonce)
+                    glslider.flagxn = 0;
+                if ((glslider.usedtexturenext === -1) && (reqnext)) {
+                    reqnext=false;
+                    glslider.animonce = true;
+                    glslider.start=null;;
+                    if (antype === 1)
+                        glslider.animgotofw(glslider.loadtexture(glslider.imagesgx[nextid].medium));
+                    else
+                        glslider.animgotobk(glslider.loadtexture(glslider.imagesgx[nextid].medium));
+                }
+            };
+            glslider.animationfn = anim;
+        </script>
+        <br>
+        <img src="../image/thumbnail/beach_tropics_sea_sand_summer_84726_300x168.jpg" alt="1" style="width:150px" onmouseover="mouseOverx(0)">
+        <img src="../image/thumbnail/mountains_grass_trees_day_summer_93030_300x168.jpg" alt="2" style="width:150px" onmouseover="mouseOverx(1)">
+        <img src="../image/thumbnail/dawn_grass_sky_summer_light_87653_300x168.jpg" alt="3" style="width:150px" onmouseover="mouseOverx(2)">
+        <img src="../image/thumbnail/beach_sand_palm_trees_tropical_90404_300x168.jpg" alt="4" style="width:150px" onmouseover="mouseOverx(3)">
+        <img src="../image/thumbnail/tree_field_plain_green_sky_lonely_day_summer_45608_300x168.jpg" alt="5" style="width:150px" onmouseover="mouseOverx(4)">
+        <img src="../image/thumbnail/mountains_nature_river_grass_beautiful_landscape_93282_300x168.jpg" alt="6" style="width:150px" onmouseover="mouseOverx(5)">
+        <img src="../image/thumbnail/tree_sun_blue_lilac_krone_spring_flowering_from_below_light_53319_300x168.jpg" alt="7" style="width:150px" onmouseover="mouseOverx(6)">
+        <img src="../image/thumbnail/lake_sunset_trees_landscape_beach_art_night_reflection_48159_300x168.jpg" alt="8" style="width:150px" onmouseover="mouseOverx(7)">
+        <img src="../image/thumbnail/mount_rainier_usa_mountains_snow_trees_grass_flowers_slope_100278_300x168.jpg" alt="9" style="width:150px" onmouseover="mouseOverx(8)">
+        <img src="../image/thumbnail/trees_park_autumn_grass_leaves_90983_300x168.jpg" alt="10" style="width:150px" onmouseover="mouseOverx(9)">
+
+
+    </body>
+</html>
