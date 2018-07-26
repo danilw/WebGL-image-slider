@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <title>GLSL images</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <script type="text/javascript" src="../unifs.js"></script>
+    </head>
+    <body style = "background: #2c2f33; padding: 32px;">
+        <canvas id = "gl" width = "555" height = "200"></canvas>
+        <script type = "text/javascript">
+            "use strict";
+            var images = [{
+                    "medium": "../svg/amazon-ws.svg",
+                }, {
+                    "medium": "../svg/asus.svg",
+                }, {
+                    "medium": "../svg/avast.svg",
+                }, {
+                    "medium": "../svg/bluetooth.svg",
+                }, {
+                    "medium": "../svg/burger-king.svg",
+                }, {
+                    "medium": "../svg/continental.svg",
+                }, {
+                    "medium": "../svg/hilti.svg",
+                }, {
+                    "medium": "../svg/sennheiser.svg",
+                }];
+            var canvas = document.getElementById('gl');
+
+            //new glslslider(<you canvas>, <max size of texture cache>, <FadeSpeed>, <image array>);
+            //<max size of texture cache> - minimal value 5 (five textures (0 to  4), 0-1-2 three textures for slider loop, 3 for load next image, 4 cache(load next image after id_3 used, then unload 3, and 3 used next time...loop))
+            //example if you images array have 1000 elements, and texture chache size=20,when 20 textures loaded, the first loaded(index 0) will unload to load and show index 21 texture from images array
+            //each texture use 1-10mb of video memory, cache size 20=200mb of video needed
+            //with value 5 every next texture will be reload every time
+            //<image array> - can be any size, textures can load and unload
+            var glslider = new glslslider(canvas, 20, 2.5, images);
+
+            //load three start textures
+            var a = glslider.loadtexture(images[0].medium);
+            var b = glslider.loadtexture(images[1].medium);
+            var c = glslider.loadtexture(images[2].medium);
+
+            //register in loop
+            glslider.animqreg(a, b, c);
+
+            //animation forward
+            glslider.nextindex = 3;//next image for animation, index in array
+            var anim = glslider.animloopfw;
+            glslider.animationfn = anim;
+
+            //animation back
+            //glslider.nextindex = images.length - 1;
+            //var anim = glslider.animloopbk;
+            //glslider.animationfn = anim;
+
+        </script>
+    </body>
+</html>
