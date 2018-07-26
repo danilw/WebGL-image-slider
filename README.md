@@ -2,18 +2,24 @@
 
 **what is it** very simple image-slider for WebGL, using GLSL. Not using any external JavaScript code/libs.
 ___
+
 *Warning*
+
 1. CORS WebGL2/WebGL does not allow to use cross-origin data [chromium blog link](https://blog.chromium.org/2011/07/using-cross-domain-images-in-webgl-and.html)
 2. **Only** WebGL, no *compatibility mode* with anything else
 ___
+
 **basic example**
+
 1. using three images in loop without "anim" function [minimal](https://danilw.github.io/WebGL-image-slider/v1/minimal/simple_slider.html)
 2. using "anim" function [minimal_more_images](https://danilw.github.io/WebGL-image-slider/v1/minimal_more_images/simple_slider.html)
 
 **other examples**
+
 [anim1](https://danilw.github.io/WebGL-image-slider/v1/anim1/simple_slider.html) [anim2](https://danilw.github.io/WebGL-image-slider/v1/anim2/simple_slider.html) [using playback/playnext](https://danilw.github.io/WebGL-image-slider/v1/fs3d/simple_slider.html) 
 
 **How it work:**
+
 WebGL viewport width and height from *canvas* attributes
 basic GLSL shader for this JavaScript logic (include loading animation in GLSL) [master/v1/fs.glsl](https://github.com/danilw/WebGL-image-slider/blob/master/v1/fs.glsl)
 *unifs.js* send to GLSL this **uniforms**:
@@ -25,6 +31,7 @@ basic GLSL shader for this JavaScript logic (include loading animation in GLSL) 
 *unifs.js* only load and unload textures(images) in loop, with synchronization to shader animation
 
 **How to use:**
+
 include script
 ```
 <script type="text/javascript" src="unifs.js"></script>
@@ -54,7 +61,8 @@ glslider.animqreg(a, b, c);
 glslider.flagxn=1;
 ```
 this is [minimal](https://danilw.github.io/WebGL-image-slider/v1/minimal/simple_slider.html) example
-using *anim* function to scroll all image in *image* array
+
+using *anim* function to scroll all image in *image* array [minimal_more_images](https://danilw.github.io/WebGL-image-slider/v1/minimal_more_images/simple_slider.html) example
 ```
 glslider.nextindex = 3;
 var anim = glslider.animloopfw;
