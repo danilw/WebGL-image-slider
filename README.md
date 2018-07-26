@@ -18,6 +18,8 @@ ___
 
 1 [anim1](https://danilw.github.io/WebGL-image-slider/v1/anim1/simple_slider.html) 2 [anim2](https://danilw.github.io/WebGL-image-slider/v1/anim2/simple_slider.html) 3 [using playback/playnext](https://danilw.github.io/WebGL-image-slider/v1/fs3d/simple_slider.html) 
 
+with image select [anim1_c](https://danilw.github.io/WebGL-image-slider/v1/anim1/simple_slider_c.html) 2 [using playback/playnext_c](https://danilw.github.io/WebGL-image-slider/v1/fs3d/simple_slider_c.html)
+
 **How it work:**
 
 WebGL viewport width and height from *canvas* attributes
