@@ -62,7 +62,7 @@ glslider.flagxn=1;
 ```
 this is [minimal](https://danilw.github.io/WebGL-image-slider/v1/minimal/simple_slider.html) example
 
-using *anim* function to scroll all image in *image* array [minimal_more_images](https://danilw.github.io/WebGL-image-slider/v1/minimal_more_images/simple_slider.html) example
+using *anim* function to scroll all images in *image* array [minimal_more_images](https://danilw.github.io/WebGL-image-slider/v1/minimal_more_images/simple_slider.html) example
 ```
 glslider.nextindex = 3;
 var anim = glslider.animloopfw;
