@@ -21,11 +21,17 @@ ___
 **How it work:**
 
 WebGL viewport width and height from *canvas* attributes
+
 basic GLSL shader for this JavaScript logic (include loading animation in GLSL) [master/v1/fs.glsl](https://github.com/danilw/WebGL-image-slider/blob/master/v1/fs.glsl)
+
 *unifs.js* send to GLSL this **uniforms**:
+
 *sampler2D* u_texture1-3 three textures
+
 *bool* u_load0-2 texture loading state, using this state you can show "loading" animation in GLSL while texture is not load(I make it in all shaders)
+
 *bool* u_playback/u_playnext state of animation trigger, if both of this false then shader will display u_texture2 without any animations
+
 *float* u_FadeSpeed speed for full "one image" animation in sec
 
 *unifs.js* only load and unload textures(images) in loop, with synchronization to shader animation
